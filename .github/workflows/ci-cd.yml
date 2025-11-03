@@ -1,60 +1,59 @@
 name: CI/CD Pipeline
-
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
 
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
+    build-and-deploy:
+        runs-on: ubuntu-latest
 
-    env:
-      IMAGE_NAME: your-dockerhub-username/node-app
-      CONTAINER_NAME: node-app
-      SERVER_HOST: your-server-ip
-      SERVER_USER: ubuntu
-      DEPLOY_PORT: 3000
+        env:
+            IMAGE_NAME: palvivek/varvadhu
+            CONTAINER_NAME: varvadhu
+            SERVER_HOST: 15.207.116.121
+            SERVER_USER: ubuntu
+            DEPLOY_PORT: 3000
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 18
 
-      - name: Install dependencies
-        run: npm ci
+            - name: Install dependencies
+              run: npm ci
 
-      - name: Run tests
-        run: npm test || echo "No tests configured"
+            - name: Run tests
+              run: npm test || echo "No tests configured"
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+            - name: Log in to Docker Hub
+              uses: docker/login-action@v3
+              with:
+                  username: palvivek
+                  password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image
-        run: docker build -t $IMAGE_NAME:latest .
+            - name: Build Docker image
+              run: docker build -t $IMAGE_NAME:latest .
 
-      - name: Push Docker image to Docker Hub
-        run: docker push $IMAGE_NAME:latest
+            - name: Push Docker image to Docker Hub
+              run: docker push $IMAGE_NAME:latest
 
-      # Optional — deploy to remote server via SSH
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ env.SERVER_HOST }}
-          username: ${{ env.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            docker pull $IMAGE_NAME:latest
-            docker stop $CONTAINER_NAME || true
-            docker rm $CONTAINER_NAME || true
-            docker run -d -p $DEPLOY_PORT:3000 --name $CONTAINER_NAME $IMAGE_NAME:latest
+            - name: Deploy to Server
+              uses: appleboy/ssh-action@v0.1.10
+              with:
+                  host: 15.207.116.121
+                  username: ubuntu
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  script: |
+                      docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+                      docker pull $IMAGE_NAME:latest
+                      docker stop $CONTAINER_NAME || true
+                      docker rm $CONTAINER_NAME || true
+                      docker run -d -p $DEPLOY_PORT:3000 --name $CONTAINER_NAME $IMAGE_NAME:latest
