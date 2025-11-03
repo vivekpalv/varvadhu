@@ -53,7 +53,7 @@ jobs:
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   script: |
                       docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-                      docker pull $IMAGE_NAME:latest
-                      docker stop $CONTAINER_NAME || true
-                      docker rm $CONTAINER_NAME || true
-                      docker run -d -p $DEPLOY_PORT:3000 --name $CONTAINER_NAME $IMAGE_NAME:latest
+                      docker pull palvivek/varvadhu:latest
+                      docker stop varvadhu || true
+                      docker rm varvadhu || true
+                      docker run -d -p 3000:3000 --name varvadhu palvivek/varvadhu:latest
