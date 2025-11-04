@@ -56,4 +56,10 @@ jobs:
                       docker pull palvivek/varvadhu:latest
                       docker stop varvadhu || true
                       docker rm varvadhu || true
-                      docker run -d -p 3000:3000 --name varvadhu palvivek/varvadhu:latest
+                      docker run -d -p 3000:3000 --name varvadhu \
+                      -e DB_URI='${{ secrets.DB_URI }}' \
+                      -e JWT_SECRET='${{ secrets.JWT_SECRET }}' \
+                      -e CLOUDINARY_CLOUD_NAME='${{ secrets.CLOUDINARY_CLOUD_NAME }}' \
+                      -e CLOUDINARY_API_KEY='${{ secrets.CLOUDINARY_API_KEY }}' \
+                      -e CLOUDINARY_API_SECRET='${{ secrets.CLOUDINARY_API_SECRET }}' \
+                      palvivek/varvadhu:latest
